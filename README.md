@@ -52,10 +52,19 @@ screener [OPTIONS] SYMBOL COMMAND [ARGS]...
 
 | Option | Values | Default | Description |
 |--------|--------|---------|-------------|
-| `--view` | `consolidated` / `standalone` | `consolidated` | Which balance sheet view to fetch |
+| `--view` | `consolidated` / `standalone` | `consolidated` | Which financial view to fetch (see below) |
 | `--format` | `json` / `text` | `json` | Output format |
 | `--no-cache` | flag | off | Bypass the in-memory TTL cache |
 | `--version` | — | — | Print version and exit |
+
+#### `--view` explained
+
+| Value | Meaning |
+|-------|---------|
+| `consolidated` | Shows the **combined** financial position of the parent company and all its subsidiaries as a single entity. Most large listed companies publish consolidated results; this is the default. |
+| `standalone` | Shows the financial position of **only the parent company**, excluding its subsidiaries. Useful when you want to analyse the parent in isolation. |
+
+If the requested view is unavailable for a ticker, the CLI automatically falls back to the other view and prints a warning.
 
 ### Commands
 

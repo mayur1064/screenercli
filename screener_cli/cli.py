@@ -42,7 +42,10 @@ def _output(data: Any, fmt: str, symbol: str = "", view: str = "") -> None:
     type=click.Choice(["consolidated", "standalone"], case_sensitive=False),
     default="consolidated",
     show_default=True,
-    help="Use consolidated or standalone financials.",
+    help=(
+        "consolidated: combined financials of the parent company and all its subsidiaries. "
+        "standalone: financials of only the parent company, excluding subsidiaries."
+    ),
 )
 @click.option(
     "--format", "fmt",
@@ -97,7 +100,7 @@ def main(ctx: click.Context, symbol: str, view: str, fmt: str, no_cache: bool) -
 @main.command("quarterly-results")
 @click.pass_context
 def quarterly_results_cmd(ctx: click.Context) -> None:
-    """Last 13 quarters of Profit & Loss."""
+    """Last 13 quarters of Profit & Loss of the company in in Rs. Crores """
     data = quarterly.parse(ctx.obj["soup"])
     if data is None:
         click.echo("Error: Quarterly Results section not found.", err=True)
@@ -108,7 +111,7 @@ def quarterly_results_cmd(ctx: click.Context) -> None:
 @main.command("profit-loss")
 @click.pass_context
 def profit_loss_cmd(ctx: click.Context) -> None:
-    """Annual Profit & Loss with compounded growth tables."""
+    """Annual Profit & Loss with compounded growth tables of the company in Rs. Crores ."""
     result = profit_loss.parse(ctx.obj["soup"])
     if result is None:
         click.echo("Error: Profit & Loss section not found.", err=True)
@@ -124,7 +127,7 @@ def profit_loss_cmd(ctx: click.Context) -> None:
 @main.command("balance-sheet")
 @click.pass_context
 def balance_sheet_cmd(ctx: click.Context) -> None:
-    """Annual Balance Sheet."""
+    """Annual Balance Sheet of the company in Rs. Crores"""
     data = balance_sheet.parse(ctx.obj["soup"])
     if data is None:
         click.echo("Error: Balance Sheet section not found.", err=True)
@@ -135,7 +138,7 @@ def balance_sheet_cmd(ctx: click.Context) -> None:
 @main.command("cash-flow")
 @click.pass_context
 def cash_flow_cmd(ctx: click.Context) -> None:
-    """Annual Cash Flow statement."""
+    """Annual Cash Flow statement of the company."""
     data = cash_flow.parse(ctx.obj["soup"])
     if data is None:
         click.echo("Error: Cash Flow section not found.", err=True)
@@ -146,7 +149,7 @@ def cash_flow_cmd(ctx: click.Context) -> None:
 @main.command("ratios")
 @click.pass_context
 def ratios_cmd(ctx: click.Context) -> None:
-    """Key operating ratios over the years."""
+    """Key operating ratios over the years of the company."""
     data = ratios.parse(ctx.obj["soup"])
     if data is None:
         click.echo("Error: Ratios section not found.", err=True)

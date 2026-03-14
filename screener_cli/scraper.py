@@ -47,6 +47,15 @@ class ConsolidatedUnavailableError(ScraperError):
         self.symbol = symbol
 
 
+class StandaloneUnavailableError(ScraperError):
+    def __init__(self, symbol: str):
+        super().__init__(
+            f"Standalone view not available for '{symbol}'. "
+            "Use --view consolidated."
+        )
+        self.symbol = symbol
+
+
 # ---------------------------------------------------------------------------
 # HTTP headers — browser-like to avoid bot detection
 # ---------------------------------------------------------------------------
@@ -70,11 +79,13 @@ HEADERS = {
 # TTL cache: max 32 entries, 5-minute expiry
 _cache: TTLCache = TTLCache(maxsize=32, ttl=300)
 
-BASE_URL = "https://www.screener.in/company/{symbol}/{view}/"
-
-
 def _build_url(symbol: str, view: str) -> str:
-    return BASE_URL.format(symbol=symbol.upper(), view=view)
+    # Standalone: https://www.screener.in/company/SYMBOL/
+    # Consolidated: https://www.screener.in/company/SYMBOL/consolidated
+    sym = symbol.upper()
+    if view == "standalone":
+        return f"https://www.screener.in/company/{sym}/"
+    return f"https://www.screener.in/company/{sym}/consolidated"
 
 
 def _do_fetch(symbol: str, view: str, timeout: int = 15) -> BeautifulSoup:
@@ -92,10 +103,15 @@ def _do_fetch(symbol: str, view: str, timeout: int = 15) -> BeautifulSoup:
             raise ScraperError(f"Connection error: {exc}") from exc
 
         if resp.status_code == 200:
-            # screener.in redirects to standalone when consolidated is absent;
-            # detect by checking the final URL.
-            if view == "consolidated" and "/standalone/" in resp.url:
+            # screener.in redirects to the base URL when consolidated is absent.
+            # A successful consolidated request whose final URL lacks /consolidated
+            # means the server silently fell back to standalone.
+            if view == "consolidated" and "/consolidated" not in resp.url:
                 raise ConsolidatedUnavailableError(symbol)
+            # If the base standalone URL somehow redirected to /consolidated
+            # the company only has a consolidated view.
+            if view == "standalone" and "/consolidated" in resp.url:
+                raise StandaloneUnavailableError(symbol)
             return BeautifulSoup(resp.text, "lxml")
 
         if resp.status_code == 404:
@@ -164,6 +180,14 @@ def fetch_page_with_fallback(
         )
         soup = fetch_page(symbol, "standalone", no_cache)
         return soup, "standalone"
+    except StandaloneUnavailableError:
+        print(
+            f"[warning] Standalone view not available for {symbol!r}; "
+            "falling back to consolidated.",
+            file=sys.stderr,
+        )
+        soup = fetch_page(symbol, "consolidated", no_cache)
+        return soup, "consolidated"
 
 
 # ---------------------------------------------------------------------------
