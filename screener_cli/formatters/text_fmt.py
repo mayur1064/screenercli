@@ -108,7 +108,22 @@ def print_text(data: Any, symbol: str = "", view: str = "") -> None:
         _render_peers(data)
         return
 
-    # Single section
+    # Pros / Cons
+    if isinstance(data, dict) and ("pros" in data or "cons" in data):
+        _render_pros_cons(data)
+        return
+
+    # About blurb
+    if isinstance(data, dict) and "about" in data:
+        _render_about(data.get("about"))
+        return
+
+    # Key metrics
+    if isinstance(data, dict) and "key_metrics" in data:
+        _render_key_metrics(data.get("key_metrics", {}))
+        return
+
+    # Single section (financial table)
     _render_section("Financial Data", data)
 
 
@@ -153,24 +168,35 @@ def _render_growth(g: Any) -> None:
     console.print()
 
 
+def _render_about(about: str | None) -> None:
+    if not about:
+        return
+    console.rule("[bold]About[/bold]")
+    console.print(about)
+    console.print()
+
+
+def _render_key_metrics(metrics: dict[str, str]) -> None:
+    if not metrics:
+        return
+    console.rule("[bold]Key Metrics[/bold]")
+    table = Table(box=box.SIMPLE, show_header=False)
+    table.add_column("Metric", style="cyan", no_wrap=True)
+    table.add_column("Value", justify="right")
+    for k, v in metrics.items():
+        table.add_row(k, v)
+    console.print(table)
+    console.print()
+
+
 def _render_pros_cons(data: Any) -> None:
     if data is None:
         return
     if dataclasses.is_dataclass(data):
         data = dataclasses.asdict(data)
 
-    about = data.get("about")
-    if about:
-        console.rule("[bold]About[/bold]")
-        console.print(about)
-        console.print()
-
-    key_metrics = data.get("key_metrics", {})
-    if key_metrics:
-        console.rule("[bold]Key Metrics[/bold]")
-        for k, v in key_metrics.items():
-            console.print(f"  [cyan]{k}[/cyan]: {v}")
-        console.print()
+    _render_about(data.get("about"))
+    _render_key_metrics(data.get("key_metrics", {}))
 
     pros = data.get("pros", [])
     cons = data.get("cons", [])

@@ -34,7 +34,7 @@ def _output(data: Any, fmt: str, symbol: str = "", view: str = "") -> None:
 # Root command group
 # ---------------------------------------------------------------------------
 
-@click.group(invoke_without_command=False)
+@click.group(invoke_without_command=False, context_settings=dict(max_content_width=120))
 @click.version_option(package_name="screener-cli")
 @click.argument("symbol")
 @click.option(
@@ -171,9 +171,25 @@ def shareholding_cmd(ctx: click.Context) -> None:
 @main.command("pros-cons")
 @click.pass_context
 def pros_cons_cmd(ctx: click.Context) -> None:
-    """Machine-generated pros and cons, about blurb, and key metrics."""
+    """Screener-generated pros and cons."""
     data = pros_cons.parse(ctx.obj["soup"])
-    _output(dataclasses.asdict(data), ctx.obj["fmt"])
+    _output({"pros": data.pros, "cons": data.cons}, ctx.obj["fmt"])
+
+
+@main.command("about")
+@click.pass_context
+def about_cmd(ctx: click.Context) -> None:
+    """Company description / about blurb."""
+    data = pros_cons.parse(ctx.obj["soup"])
+    _output({"about": data.about}, ctx.obj["fmt"])
+
+
+@main.command("key-metrics")
+@click.pass_context
+def key_metrics_cmd(ctx: click.Context) -> None:
+    """Key header metrics: Market Cap, P/E, Book Value, Dividend Yield, etc."""
+    data = pros_cons.parse(ctx.obj["soup"])
+    _output({"key_metrics": data.key_metrics}, ctx.obj["fmt"])
 
 
 @main.command("peer-comparison")

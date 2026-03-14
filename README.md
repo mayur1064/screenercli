@@ -76,7 +76,9 @@ If the requested view is unavailable for a ticker, the CLI automatically falls b
 | `cash-flow` | Annual Cash Flow statement |
 | `ratios` | Key operating ratios over the years |
 | `shareholding` | Quarterly promoter / FII / DII / public holding |
-| `pros-cons` | Screener-generated pros, cons, about blurb and key metrics |
+| `pros-cons` | Screener-generated pros and cons |
+| `about` | Company description / about blurb |
+| `key-metrics` | Key header metrics (Market Cap, P/E, Book Value, etc.) |
 | `peer-comparison` | Industry peers with valuation and performance metrics |
 | `all` | All sections combined into one JSON payload |
 
