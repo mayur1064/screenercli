@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "screenercli"
+version = "0.1.0"
+description = "CLI tool that scrapes screener.in and returns structured financial data optimised for LLM agents."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["finance", "screener", "stock", "cli", "agent"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial",
+    "Environment :: Console",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Developers",
+]
+dependencies = [
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "cachetools>=5.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mayur1064/screenercli"
+Repository = "https://github.com/mayur1064/screenercli"
+"Bug Tracker" = "https://github.com/mayur1064/screenercli/issues"
+
+[project.scripts]
+screener = "screener_cli.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["screener_cli*"]
